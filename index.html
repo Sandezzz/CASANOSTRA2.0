@@ -107,20 +107,20 @@
       div.innerHTML = `
         <h2>${dia}</h2>
         
+        <!-- Apertura de caja -->
+        <h3>Apertura de Caja</h3>
+        <input type="number" id="apertura-${dia}" placeholder="Monto apertura">
+        <button onclick="guardarApertura('${dia}')">Guardar Apertura</button>
+        <div class="total">Apertura: $<span id="aperturaValor-${dia}">0</span></div>
+        <hr>
+
         <!-- Ventas -->
+        <h3>Ventas</h3>
         <input type="text" id="producto-${dia}" placeholder="Producto">
         <input type="number" id="cantidad-${dia}" placeholder="Cantidad" min="1">
         <input type="number" id="precio-${dia}" placeholder="Precio unitario" step="0.01">
         <button onclick="agregarVenta('${dia}')">Agregar Venta</button>
-        <br><br>
-        
-        <!-- Gastos -->
-        <input type="text" id="detalleGasto-${dia}" placeholder="Detalle gasto">
-        <input type="number" id="gasto-${dia}" placeholder="Monto gasto">
-        <button onclick="agregarGasto('${dia}')">Agregar Gasto</button>
 
-        <!-- Tabla ventas -->
-        <h3>Ventas</h3>
         <table id="tablaVentas-${dia}">
           <thead>
             <tr>
@@ -134,8 +134,12 @@
           <tbody></tbody>
         </table>
 
-        <!-- Tabla gastos -->
+        <!-- Gastos -->
         <h3>Gastos</h3>
+        <input type="text" id="detalleGasto-${dia}" placeholder="Detalle gasto">
+        <input type="number" id="gasto-${dia}" placeholder="Monto gasto">
+        <button onclick="agregarGasto('${dia}')">Agregar Gasto</button>
+
         <table id="tablaGastos-${dia}">
           <thead>
             <tr>
@@ -155,12 +159,30 @@
       document.getElementById("contenedorDias").appendChild(div);
 
       // Inicializar datos
-      data[dia] = { ventas: [], gastos: [], totalVentas: 0, totalGastos: 0, balance: 0 };
+      data[dia] = { 
+        apertura: 0,
+        ventas: [], 
+        gastos: [], 
+        totalVentas: 0, 
+        totalGastos: 0, 
+        balance: 0 
+      };
     });
 
     function mostrarDia(dia) {
       document.querySelectorAll(".dia").forEach(div => div.style.display = "none");
       document.getElementById("dia-" + dia).style.display = "block";
+    }
+
+    function guardarApertura(dia) {
+      const valor = parseFloat(document.getElementById(`apertura-${dia}`).value);
+      if (!isNaN(valor) && valor >= 0) {
+        data[dia].apertura = valor;
+        actualizarTotales(dia);
+        document.getElementById(`aperturaValor-${dia}`).innerText = valor.toFixed(2);
+      } else {
+        alert("Ingrese un monto válido de apertura");
+      }
     }
 
     function agregarVenta(dia) {
@@ -225,7 +247,7 @@
     }
 
     function actualizarTotales(dia) {
-      const balance = data[dia].totalVentas - data[dia].totalGastos;
+      const balance = data[dia].apertura + data[dia].totalVentas - data[dia].totalGastos;
       data[dia].balance = balance;
       document.getElementById(`ventas-${dia}`).innerText = data[dia].totalVentas.toFixed(2);
       document.getElementById(`gastos-${dia}`).innerText = data[dia].totalGastos.toFixed(2);
@@ -234,4 +256,3 @@
   </script>
 </body>
 </html>
-
