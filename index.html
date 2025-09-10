@@ -2,7 +2,7 @@
 <html lang="es">
 <head>
   <meta charset="UTF-8">
-  <title>Casanostra - Planilla Semanal con Productos</title>
+  <title>Casanostra - Planilla Semanal</title>
   <style>
     body {
       font-family: Arial, sans-serif;
@@ -13,12 +13,33 @@
       text-align: center;
       color: #333;
     }
+    .menu {
+      display: flex;
+      justify-content: center;
+      margin-bottom: 20px;
+      flex-wrap: wrap;
+      gap: 10px;
+    }
+    .menu button {
+      padding: 10px 15px;
+      font-size: 14px;
+      background: #007bff;
+      color: white;
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
+    }
+    .menu button:hover {
+      background: #0056b3;
+    }
     .dia {
+      display: none;
       background: #fff;
       padding: 15px;
-      margin: 15px 0;
+      margin: 15px auto;
       border-radius: 12px;
       box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+      max-width: 800px;
     }
     input {
       padding: 6px;
@@ -56,34 +77,33 @@
       font-weight: bold;
       font-size: 15px;
     }
-    .rendimiento {
-      background: #d4edda;
-      padding: 15px;
-      margin-top: 20px;
-      border-radius: 12px;
-      text-align: center;
-      font-size: 18px;
-      font-weight: bold;
-      border: 2px solid #c3e6cb;
-    }
   </style>
 </head>
 <body>
   <h1>Casanostra - Planilla Semanal</h1>
 
-  <div id="semana"></div>
+  <!-- Menú de selección -->
+  <div class="menu" id="menuDias"></div>
 
-  <div class="rendimiento">
-    Rendimiento Semanal: $<span id="rendimientoSemanal">0</span>
-  </div>
+  <!-- Contenedor de planillas -->
+  <div id="contenedorDias"></div>
 
   <script>
-    const dias = ["Lunes", "Martes", "Miércoles", "Jueves", "Viernes", "Sábado", "Domingo"];
-    let data = {}; // Guarda ventas/gastos de cada día
+    const dias = ["Lunes","Martes","Miércoles","Jueves","Viernes","Sábado","Domingo"];
+    let data = {};
 
-    function crearDia(dia) {
+    // Crear menú y planillas
+    dias.forEach(dia => {
+      // Botón en menú
+      const btn = document.createElement("button");
+      btn.innerText = dia;
+      btn.onclick = () => mostrarDia(dia);
+      document.getElementById("menuDias").appendChild(btn);
+
+      // Contenedor del día
       const div = document.createElement("div");
       div.className = "dia";
+      div.id = "dia-" + dia;
       div.innerHTML = `
         <h2>${dia}</h2>
         
@@ -132,14 +152,16 @@
         <div class="total">Total Gastos: $<span id="gastos-${dia}">0</span></div>
         <div class="total">Balance del día: $<span id="balance-${dia}">0</span></div>
       `;
-      document.getElementById("semana").appendChild(div);
+      document.getElementById("contenedorDias").appendChild(div);
 
-      // Inicializamos datos del día
+      // Inicializar datos
       data[dia] = { ventas: [], gastos: [], totalVentas: 0, totalGastos: 0, balance: 0 };
-    }
+    });
 
-    // Crear los 7 días
-    dias.forEach(dia => crearDia(dia));
+    function mostrarDia(dia) {
+      document.querySelectorAll(".dia").forEach(div => div.style.display = "none");
+      document.getElementById("dia-" + dia).style.display = "block";
+    }
 
     function agregarVenta(dia) {
       const producto = document.getElementById(`producto-${dia}`).value.trim();
@@ -181,7 +203,6 @@
     function actualizarTablaVentas(dia) {
       const tbody = document.getElementById(`tablaVentas-${dia}`).getElementsByTagName("tbody")[0];
       tbody.innerHTML = "";
-
       data[dia].ventas.forEach((venta, i) => {
         const fila = tbody.insertRow();
         fila.insertCell(0).innerText = i + 1;
@@ -195,7 +216,6 @@
     function actualizarTablaGastos(dia) {
       const tbody = document.getElementById(`tablaGastos-${dia}`).getElementsByTagName("tbody")[0];
       tbody.innerHTML = "";
-
       data[dia].gastos.forEach((gasto, i) => {
         const fila = tbody.insertRow();
         fila.insertCell(0).innerText = i + 1;
@@ -207,18 +227,9 @@
     function actualizarTotales(dia) {
       const balance = data[dia].totalVentas - data[dia].totalGastos;
       data[dia].balance = balance;
-
       document.getElementById(`ventas-${dia}`).innerText = data[dia].totalVentas.toFixed(2);
       document.getElementById(`gastos-${dia}`).innerText = data[dia].totalGastos.toFixed(2);
       document.getElementById(`balance-${dia}`).innerText = balance.toFixed(2);
-
-      calcularRendimientoSemanal();
-    }
-
-    function calcularRendimientoSemanal() {
-      let total = 0;
-      dias.forEach(dia => total += data[dia].balance);
-      document.getElementById("rendimientoSemanal").innerText = total.toFixed(2);
     }
   </script>
 </body>
