@@ -41,7 +41,7 @@
       box-shadow: 0 4px 10px rgba(0,0,0,0.1);
       max-width: 800px;
     }
-    input {
+    input, select {
       padding: 6px;
       font-size: 14px;
       margin: 5px;
@@ -114,9 +114,17 @@
         <div class="total">Apertura: $<span id="aperturaValor-${dia}">0</span></div>
         <hr>
 
+        <!-- Productos -->
+        <h3>Productos</h3>
+        <input type="text" id="nuevoProducto-${dia}" placeholder="Nombre del producto">
+        <button onclick="agregarProducto('${dia}')">Agregar Producto</button>
+        <br>
+
         <!-- Ventas -->
         <h3>Ventas</h3>
-        <input type="text" id="producto-${dia}" placeholder="Producto">
+        <select id="productoSelect-${dia}">
+          <option value="">-- Seleccionar producto --</option>
+        </select>
         <input type="number" id="cantidad-${dia}" placeholder="Cantidad" min="1">
         <input type="number" id="precio-${dia}" placeholder="Precio unitario" step="0.01">
         <button onclick="agregarVenta('${dia}')">Agregar Venta</button>
@@ -161,6 +169,7 @@
       // Inicializar datos
       data[dia] = { 
         apertura: 0,
+        productos: [],
         ventas: [], 
         gastos: [], 
         totalVentas: 0, 
@@ -185,8 +194,29 @@
       }
     }
 
+    function agregarProducto(dia) {
+      const input = document.getElementById(`nuevoProducto-${dia}`);
+      const producto = input.value.trim();
+
+      if (producto && !data[dia].productos.includes(producto)) {
+        data[dia].productos.push(producto);
+
+        // Agregar al select
+        const select = document.getElementById(`productoSelect-${dia}`);
+        const option = document.createElement("option");
+        option.value = producto;
+        option.text = producto;
+        select.add(option);
+
+        input.value = "";
+      } else {
+        alert("Ingrese un producto válido que no esté repetido");
+      }
+    }
+
     function agregarVenta(dia) {
-      const producto = document.getElementById(`producto-${dia}`).value.trim();
+      const select = document.getElementById(`productoSelect-${dia}`);
+      const producto = select.value;
       const cantidad = parseInt(document.getElementById(`cantidad-${dia}`).value);
       const precio = parseFloat(document.getElementById(`precio-${dia}`).value);
 
@@ -197,9 +227,9 @@
         actualizarTablaVentas(dia);
         actualizarTotales(dia);
 
-        document.getElementById(`producto-${dia}`).value = "";
         document.getElementById(`cantidad-${dia}`).value = "";
         document.getElementById(`precio-${dia}`).value = "";
+        select.value = "";
       } else {
         alert("Complete todos los datos de la venta correctamente");
       }
